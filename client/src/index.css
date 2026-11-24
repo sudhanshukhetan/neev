@@ -262,6 +262,7 @@ input[type='range']:focus-visible::-webkit-slider-thumb {
   grid-template-rows: 1fr;
   height: calc(100vh - 44px);
   overflow: hidden;
+  max-width: 100vw;
 }
 
 @media (max-width: 1024px) {
@@ -271,6 +272,22 @@ input[type='range']:focus-visible::-webkit-slider-thumb {
     height: auto;
     overflow: visible;
   }
+}
+
+/* Touch targets >= 44px on mobile */
+@media (max-width: 768px) {
+  button, input[type="range"], select, a {
+    min-height: 44px;
+  }
+  input[type="range"] {
+    padding: 12px 0;
+  }
+}
+
+/* Zero horizontal overflow safety */
+body, #root {
+  max-width: 100vw;
+  overflow-x: hidden;
 }
 
 /* ── Print Styles ── */
