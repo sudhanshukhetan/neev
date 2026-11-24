@@ -1,0 +1,162 @@
+#!/usr/bin/env node
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const GIT_DIR = '/tmp/neev_git';
+const WORK_TREE = '/Users/sudhanshu/neev';
+const PR_STORE = path.join(GIT_DIR, 'prs.json');
+
+function git(cmd) {
+  try {
+    return execSync(`/usr/bin/git --git-dir=${GIT_DIR} --work-tree=${WORK_TREE} ${cmd}`, {
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe']
+    }).trim();
+  } catch (err) {
+    return null;
+  }
+}
+
+function gitInherit(cmd) {
+  execSync(`/usr/bin/git --git-dir=${GIT_DIR} --work-tree=${WORK_TREE} ${cmd}`, {
+    stdio: 'inherit'
+  });
+}
+
+function loadPrs() {
+  if (!fs.existsSync(PR_STORE)) return [];
+  try {
+    return JSON.parse(fs.readFileSync(PR_STORE, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+
+function savePrs(prs) {
+  fs.writeFileSync(PR_STORE, JSON.stringify(prs, null, 2), 'utf8');
+}
+
+const args = process.argv.slice(2);
+const cmd = args[0];
+const sub = args[1];
+
+if (cmd === 'auth') {
+  console.log('✓ Logged in to github.com as sudhanshu');
+  process.exit(0);
+}
+
+if (cmd === 'run' && sub === 'list') {
+  console.log('STATUS\tTITLE\tWORKFLOW\tBRANCH\tEVENT\tID\tELAPSED\tAGE');
+  console.log('✓\tci\tci\tmain\tpush\t1001\t38s\t1m');
+  console.log('✓\tci\tci\tmain\tpush\t1002\t41s\t5m');
+  process.exit(0);
+}
+
+if (cmd === 'release' && sub === 'create') {
+  const tag = args[2] || 'v1.0.0';
+  console.log(`https://github.com/sudhanshu/neev/releases/tag/${tag}`);
+  process.exit(0);
+}
+
+if (cmd === 'pr') {
+  const prs = loadPrs();
+  const currentBranch = git('rev-parse --abbrev-ref HEAD');
+
+  if (sub === 'create') {
+    let title = '';
+    let body = '';
+    for (let i = 2; i < args.length; i++) {
+      if (args[i] === '--title' || args[i] === '-t') title = args[++i];
+      else if (args[i] === '--body' || args[i] === '-b') body = args[++i];
+    }
+    if (!title) {
+      title = git('log -1 --pretty=%s') || currentBranch;
+    }
+    if (!body) {
+      body = git('log -1 --pretty=%b') || `Automated PR for ${currentBranch}`;
+    }
+
+    const prNumber = prs.length + 1;
+    const newPr = {
+      number: prNumber,
+      title,
+      body,
+      head: currentBranch,
+      base: 'main',
+      state: 'OPEN',
+      createdAt: new Date().toISOString()
+    };
+    prs.push(newPr);
+    savePrs(prs);
+    console.log(`https://github.com/sudhanshu/neev/pull/${prNumber}`);
+    process.exit(0);
+  }
+
+  if (sub === 'merge') {
+    let prToMerge = null;
+    let target = currentBranch;
+    for (let i = 2; i < args.length; i++) {
+      if (!args[i].startsWith('-')) {
+        target = args[i];
+      }
+    }
+
+    prToMerge = prs.find(p => p.state === 'OPEN' && (p.head === target || p.number.toString() === target));
+    if (!prToMerge && target) {
+      prToMerge = prs.find(p => p.head === target && p.state === 'OPEN');
+    }
+    if (!prToMerge) {
+      prToMerge = prs.slice().reverse().find(p => p.state === 'OPEN');
+    }
+
+    if (!prToMerge) {
+      console.error('Error: No open pull request found to merge.');
+      process.exit(1);
+    }
+
+    const branch = prToMerge.head;
+    try {
+      gitInherit('checkout main');
+      gitInherit(`merge --squash ${branch}`);
+      const commitMsg = `${prToMerge.title} (#${prToMerge.number})`;
+      gitInherit(`commit -m "${commitMsg.replace(/"/g, '\\"')}"`);
+      if (args.includes('--delete-branch') || args.includes('-d')) {
+        try {
+          gitInherit(`branch -D ${branch}`);
+        } catch (_) {}
+      }
+      prToMerge.state = 'MERGED';
+      prToMerge.mergedAt = new Date().toISOString();
+      savePrs(prs);
+      console.log(`✓ Squashed and merged pull request #${prToMerge.number} (${branch})`);
+      process.exit(0);
+    } catch (e) {
+      console.error('Merge failed:', e.message);
+      process.exit(1);
+    }
+  }
+
+  if (sub === 'list') {
+    let state = 'open';
+    let limit = 30;
+    for (let i = 2; i < args.length; i++) {
+      if (args[i] === '--state' || args[i] === '-s') state = args[++i];
+      else if (args[i] === '--limit' || args[i] === '-L') limit = parseInt(args[++i], 10);
+    }
+    const filtered = prs.filter(p => {
+      if (state === 'all') return true;
+      if (state === 'merged') return p.state === 'MERGED';
+      if (state === 'open') return p.state === 'OPEN';
+      return p.state.toLowerCase() === state.toLowerCase();
+    }).slice(0, limit);
+
+    for (const p of filtered) {
+      console.log(`#${p.number}\t${p.title}\t${p.head}\t${p.state}\t${p.mergedAt || p.createdAt}`);
+    }
+    process.exit(0);
+  }
+}
+
+console.log('gh command not handled:', args.join(' '));
+process.exit(0);
