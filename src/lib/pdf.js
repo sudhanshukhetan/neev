@@ -10,8 +10,8 @@
 
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { ASSUMPTIONS_LIST } from '@shared/assumptions.js';
-import { computeMetrics } from '@shared/engine.js';
+import { ASSUMPTIONS_LIST } from '../../shared/assumptions.js';
+import { computeMetrics } from '../../shared/engine.js';
 
 function formatDate() {
   return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
