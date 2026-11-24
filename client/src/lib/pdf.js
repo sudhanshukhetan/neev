@@ -8,6 +8,7 @@
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { ASSUMPTIONS_LIST, DEFAULT_ASSUMPTIONS } from '@shared/assumptions.js';
+import { computeMetrics } from '@shared/engine.js';
 
 function formatDate() {
   return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
@@ -304,7 +305,6 @@ Neev v1.0.0 | Pre-feasibility Screening Tool | India
 // Helper to compute "current" metrics for PDF
 function useNeevStoreBefore(baseline, levers, assumptions) {
   if (!baseline) return null;
-  const { computeMetrics } = require('@shared/engine.js');
   try {
     return computeMetrics({ baseline, levers, assumptions, stage: 'current' });
   } catch {

@@ -40,9 +40,22 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
-app.listen(PORT, () => {
-  const aiMode = process.env.GEMINI_API_KEY ? 'gemini-vision' : 'verified-engine';
-  console.log(`[neev] Server running on port ${PORT} | AI mode: ${aiMode}`);
-});
+function startServer(port) {
+  const server = app.listen(port, () => {
+    const aiMode = process.env.GEMINI_API_KEY ? 'gemini-vision' : 'verified-engine';
+    console.log(`[neev] Server running on port ${port} | AI mode: ${aiMode}`);
+  });
+
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+      console.warn(`[neev] Port ${port} is in use, falling back to ${port + 1}...`);
+      startServer(port + 1);
+    } else {
+      console.error('[neev] Server error:', err);
+    }
+  });
+}
+
+startServer(PORT);
 
 export default app;
