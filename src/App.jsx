@@ -1,10 +1,26 @@
+/**
+ * src/App.jsx
+ * Unified Full-Bleed Spatial Digital Twin Studio (Constructive-style HUD Interface).
+ * Integrates:
+ *  - 100% full-bleed Three.js 3D Viewport / Leaflet World Map discovery canvas
+ *  - Floating collapsible obsidian glass HUD Inspector (Left)
+ *  - Floating collapsible obsidian glass KPI Feasibility Dock (Right)
+ *  - Centered floating bottom Command Dock (Camera, Stage, Disasters, Blueprints)
+ *  - Seamless transitions between World Map, Greenfield Plain Land Studio, and Urban Retrofitting
+ */
+
 import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import {
+  ChevronLeft, ChevronRight, Sliders, MapPin, TrendingUp,
+  ShieldCheck, Layers, Building2, Sparkles, X, Minimize2, Maximize2
+} from 'lucide-react';
 import { useNeevStore } from './store/useNeevStore.js';
 import { useT } from './i18n/useT.js';
 import Navbar from './components/layout/Navbar.jsx';
 import Hero from './components/layout/Hero.jsx';
 import WorldMap from './components/map/WorldMap.jsx';
+import BottomDock from './components/studio/BottomDock.jsx';
 
 // Urban Studio Components
 import SitePanel from './components/studio/SitePanel.jsx';
@@ -18,8 +34,6 @@ import PhasePlan from './components/studio/PhasePlan.jsx';
 import Scene2D from './components/scene/Scene2D.jsx';
 import SceneErrorBoundary from './components/scene/SceneErrorBoundary.jsx';
 import AssumptionsDrawer from './components/studio/AssumptionsDrawer.jsx';
-import FireDispatch from './components/story/FireDispatch.jsx';
-import MonsoonMode from './components/story/MonsoonMode.jsx';
 
 // Greenfield Plain-Land Studio Components
 import PlainLandStudio from './components/plainland/PlainLandStudio.jsx';
@@ -39,9 +53,6 @@ function detectWebGL(forceDisable = false) {
   }
 }
 
-const URBAN_TABS = ['audit', 'levers', 'impact'];
-const PLAIN_TABS = ['structures', 'metrics'];
-
 export default function App() {
   const t = useT();
   const {
@@ -55,10 +66,18 @@ export default function App() {
     assumptionsOpen,
   } = useNeevStore();
 
-  const [activeTab, setActiveTab] = useState('audit');
   const [webGLAvailable, setWebGLAvailable] = useState(true);
-  const [heroVisible, setHeroVisible] = useState(false); // Map is default primary hero!
-  const studioRef = React.useRef(null);
+  const [heroVisible, setHeroVisible] = useState(false);
+
+  // HUD State: Collapsible Drawers & Visibility
+  const [hudVisible, setHudVisible] = useState(true);
+  const [leftOpen, setLeftOpen] = useState(true);
+  const [rightOpen, setRightOpen] = useState(true);
+
+  // Tab selections
+  const [urbanLeftTab, setUrbanLeftTab] = useState('levers'); // 'levers' | 'site'
+  const [urbanRightTab, setUrbanRightTab] = useState('impact'); // 'impact' | 'phases'
+  const [mobileTab, setMobileTab] = useState('left'); // 'left' | 'right' for mobile
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -70,15 +89,17 @@ export default function App() {
     }
   }, [setMode]);
 
-  const scrollToStudio = () => {
-    setHeroVisible(false);
-    studioRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  // If no audit yet, start on site tab in urban mode
+  useEffect(() => {
+    if (appMode === 'urban' && !hasAudit) {
+      setUrbanLeftTab('site');
+    }
+  }, [appMode, hasAudit]);
 
   const show3D = mode === '3d' && webGLAvailable;
 
   return (
-    <div className="min-h-screen blueprint-grid flex flex-col font-ui select-none overflow-x-hidden">
+    <div className="h-screen w-screen flex flex-col font-ui select-none overflow-hidden bg-slate-950 text-slate-100">
       {/* ── Top Unified Navbar ── */}
       <Navbar webGLAvailable={webGLAvailable} />
 
@@ -89,249 +110,293 @@ export default function App() {
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
+            className="z-40 relative"
           >
-            <Hero onStart={scrollToStudio} />
+            <Hero onStart={() => setHeroVisible(false)} />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ── MAIN CONTENT AREA ── */}
-      <main ref={studioRef} className="flex-1 relative overflow-hidden">
-        {/* MODE 1: INTERACTIVE WORLD MAP & DISCOVERY CANVAS */}
-        {appMode === 'map' && (
-          <div className="w-full h-full">
+      {/* ── MAIN FULL-BLEED VIEWPORT CONTAINER ── */}
+      <main className="flex-1 relative overflow-hidden w-full h-[calc(100vh-48px)]">
+        {/* ── FULL-BLEED BACKGROUND CANVAS (3D SCENE OR WORLD MAP) ── */}
+        <div className="absolute inset-0 w-full h-full z-0">
+          {appMode === 'map' ? (
             <WorldMap />
-          </div>
-        )}
-
-        {/* MODE 2: GREENFIELD PLAIN-LAND CONSTRUCTION STUDIO */}
-        {appMode === 'plain' && (
-          <div className="w-full h-[calc(100vh-48px)]">
-            {/* Desktop 3-column layout */}
-            <div className="hidden lg:grid grid-cols-[380px_1fr_420px] h-full">
-              {/* Left Panel: Click & Build Toolbar */}
-              <div className="overflow-y-auto">
-                <PlainLandStudio />
-              </div>
-
-              {/* Center 3D Stage */}
-              <div className="relative overflow-hidden bg-slate-900 border-r border-line">
-                <div className="w-full h-full">
-                  {show3D ? (
-                    <SceneErrorBoundary>
-                      <Suspense fallback={<SceneFallback />}>
-                        <Scene3D />
-                      </Suspense>
-                    </SceneErrorBoundary>
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-950 text-slate-400 font-mono text-xs">
-                      2D Layout Mode active
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Right Panel: Feasibility Metrics & Budget */}
-              <div className="overflow-y-auto">
-                <PlainLandMetrics />
-              </div>
+          ) : show3D ? (
+            <SceneErrorBoundary>
+              <Suspense fallback={<SceneFallback />}>
+                <Scene3D />
+              </Suspense>
+            </SceneErrorBoundary>
+          ) : (
+            <div className="w-full h-full bg-slate-900 flex items-center justify-center">
+              <Scene2D />
             </div>
+          )}
+        </div>
 
-            {/* Mobile / Tablet Plain Land Layout */}
-            <div className="lg:hidden flex flex-col h-full overflow-y-auto">
-              <div className="relative bg-slate-950 shrink-0" style={{ height: '45vw', minHeight: 220, maxHeight: 360 }}>
-                {show3D ? (
-                  <SceneErrorBoundary>
-                    <Suspense fallback={<SceneFallback />}>
-                      <Scene3D />
-                    </Suspense>
-                  </SceneErrorBoundary>
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-slate-400 text-xs font-mono">
-                    2D Mode
+        {/* ── DESKTOP FLOATING HUD PANELS (Shown for Urban & Plain modes) ── */}
+        {appMode !== 'map' && (
+          <>
+            {/* ── 1. LEFT HUD PANEL (Parameters / Structures / Levers) ── */}
+            <AnimatePresence>
+              {hudVisible && leftOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: -40, scale: 0.98 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -40, scale: 0.98 }}
+                  transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+                  className="hidden lg:flex absolute top-4 left-4 bottom-20 w-[420px] max-w-[calc(100vw-32px)] z-20 pointer-events-auto hud-panel flex-col overflow-hidden"
+                >
+                  {/* Left Panel Header */}
+                  <div className="hud-panel-header px-4 py-2.5 flex items-center justify-between flex-shrink-0">
+                    {appMode === 'plain' ? (
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-emerald-400" />
+                        <span className="font-heading font-semibold text-xs tracking-wide text-white uppercase">
+                          Greenfield Structures
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setUrbanLeftTab('levers')}
+                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
+                            urbanLeftTab === 'levers'
+                              ? 'bg-orange-600 text-white font-semibold shadow'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <Sliders className="w-3.5 h-3.5" />
+                          <span>9 Levers</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUrbanLeftTab('site')}
+                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
+                            urbanLeftTab === 'site'
+                              ? 'bg-orange-600 text-white font-semibold shadow'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <MapPin className="w-3.5 h-3.5" />
+                          <span>Site & Photo</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Collapse Button */}
+                    <button
+                      type="button"
+                      onClick={() => setLeftOpen(false)}
+                      title="Collapse Left Panel"
+                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </button>
                   </div>
-                )}
-              </div>
 
-              {/* Mobile Tab Selector */}
-              <div className="sticky top-0 z-20 flex border-y border-line bg-card">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('structures')}
-                  className={`flex-1 py-2.5 text-xs font-mono text-center border-r border-line ${
-                    activeTab === 'structures' ? 'text-emerald-700 font-bold border-b-2 border-b-emerald-600 bg-emerald-50/50' : 'text-muted'
-                  }`}
-                >
-                  Structures & Sliders
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('metrics')}
-                  className={`flex-1 py-2.5 text-xs font-mono text-center ${
-                    activeTab === 'metrics' ? 'text-emerald-700 font-bold border-b-2 border-b-emerald-600 bg-emerald-50/50' : 'text-muted'
-                  }`}
-                >
-                  Budget & Timeline
-                </button>
-              </div>
-
-              <div className="p-2 pb-16">
-                {activeTab === 'structures' ? <PlainLandStudio /> : <PlainLandMetrics />}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* MODE 3: URBAN REDEVELOPMENT & RETROFITTING STUDIO */}
-        {appMode === 'urban' && (
-          <div className="w-full h-[calc(100vh-48px)]">
-            {/* Desktop 3-column layout */}
-            <div className="hidden lg:grid studio-layout h-full">
-              {/* Left panel: Site + Audit */}
-              <div className="flex flex-col border-r border-line overflow-y-auto bg-card">
-                <div className="title-block flex-shrink-0">
-                  <span className="title-block-cell font-mono text-xs">{t('sheet_no')}</span>
-                  <span className="title-block-cell font-mono text-xs">{t('sheet_scale')}</span>
-                  <span className="title-block-cell font-mono text-xs">{t('sheet_rev')}</span>
-                  <span className="title-block-cell font-mono text-xs flex-1">
-                    {new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}
-                  </span>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <SitePanel />
-                  <div className="border-t border-line" />
-                  <AuditPanel />
-                </div>
-              </div>
-
-              {/* Center: 3D Scene + Levers */}
-              <div className="flex flex-col overflow-hidden border-r border-line">
-                {/* State controls & blueprints */}
-                <div className="flex items-center gap-4 px-4 py-2 border-b border-line bg-card flex-shrink-0">
-                  <StateToggle />
-                  <div className="flex-1" />
-                  <BlueprintSelector />
-                </div>
-
-                {/* 3D / 2D Viewport */}
-                <div className="flex-1 relative overflow-hidden bg-paper">
-                  {show3D ? (
-                    <SceneErrorBoundary>
-                      <Suspense fallback={<SceneFallback />}>
-                        <Scene3D />
-                      </Suspense>
-                    </SceneErrorBoundary>
-                  ) : (
-                    <Scene2D />
-                  )}
-
-                  {/* Story buttons */}
-                  {hasAudit && (
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
-                      <FireDispatch />
-                      <MonsoonMode />
-                    </div>
-                  )}
-                </div>
-
-                {/* Lever panel */}
-                <div className="border-t border-line flex-shrink-0 bg-card max-h-56 overflow-y-auto">
-                  <LeverPanel />
-                </div>
-              </div>
-
-              {/* Right panel: Impact + Phases + Screening */}
-              <div className="flex flex-col overflow-y-auto bg-card">
-                <div className="border-b border-line flex-shrink-0 p-3">
-                  <span className="label-mono">{t('impact_title')}</span>
-                </div>
-                <div className="flex-1 overflow-y-auto">
-                  <ImpactPanel />
-                  <div className="border-t border-line" />
-                  <PhasePlan />
-                  <div className="border-t border-line" />
-                  <ScreeningChecks />
-                </div>
-              </div>
-            </div>
-
-            {/* Mobile / Tablet Urban Layout */}
-            <div className="lg:hidden flex flex-col h-full overflow-y-auto">
-              <div className="relative bg-paper shrink-0" style={{ height: '50vw', minHeight: 220, maxHeight: 380 }}>
-                {show3D ? (
-                  <SceneErrorBoundary>
-                    <Suspense fallback={<SceneFallback />}>
-                      <Scene3D />
-                    </Suspense>
-                  </SceneErrorBoundary>
-                ) : (
-                  <Scene2D />
-                )}
-              </div>
-
-              <div className="border-y border-line bg-card px-4 py-2 flex gap-3 items-center flex-wrap">
-                <StateToggle />
-                <div className="flex-1" />
-                <BlueprintSelector compact />
-              </div>
-
-              <div className="border-b border-line bg-card">
-                <LeverPanel compact />
-              </div>
-
-              {hasAudit && (
-                <div className="flex gap-2 px-4 py-2 border-b border-line bg-paper">
-                  <FireDispatch />
-                  <MonsoonMode />
-                </div>
+                  {/* Left Panel Content */}
+                  <div className="flex-1 overflow-y-auto hud-scroll">
+                    {appMode === 'plain' ? (
+                      <PlainLandStudio />
+                    ) : urbanLeftTab === 'levers' ? (
+                      <div>
+                        <div className="p-2 border-b border-white/10">
+                          <BlueprintSelector compact={false} />
+                        </div>
+                        <LeverPanel />
+                      </div>
+                    ) : (
+                      <div className="p-1">
+                        <SitePanel />
+                        <div className="border-t border-white/10 my-1" />
+                        <AuditPanel />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
               )}
+            </AnimatePresence>
 
-              <div className="sticky top-0 z-20 flex border-t border-line bg-card">
-                {URBAN_TABS.map((tab) => (
-                  <button
-                    key={tab}
-                    type="button"
-                    onClick={() => setActiveTab(tab)}
-                    className={`flex-1 py-3 text-xs font-mono text-center border-r last:border-r-0 border-line transition-colors ${
-                      activeTab === tab ? 'text-terracotta bg-paper border-b-2 border-b-terracotta font-bold' : 'text-muted hover:text-ink'
-                    }`}
-                    style={{ minHeight: 44 }}
-                  >
-                    {tab === 'audit' && t('audit_panel_title')}
-                    {tab === 'levers' && t('lever_panel_title')}
-                    {tab === 'impact' && t('impact_title')}
-                  </button>
-                ))}
-              </div>
+            {/* Left Panel Collapsed Floating Trigger */}
+            {hudVisible && !leftOpen && (
+              <button
+                type="button"
+                onClick={() => setLeftOpen(true)}
+                title="Expand Parameters"
+                className="hidden lg:flex absolute top-5 left-4 z-20 px-3 py-2 rounded-full hud-dock text-xs font-mono text-slate-200 hover:text-white items-center gap-2 shadow-2xl border border-white/20 hover:scale-105 transition-all"
+              >
+                <Sliders className="w-3.5 h-3.5 text-orange-400" />
+                <span>{appMode === 'plain' ? 'Structures' : 'Parameters'}</span>
+                <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+              </button>
+            )}
 
-              <div className="bg-card p-2 pb-16">
-                {activeTab === 'audit' && (
-                  <div>
-                    <SitePanel />
-                    <div className="border-t border-line" />
-                    <AuditPanel />
+            {/* ── 2. RIGHT HUD PANEL (Feasibility KPIs / Cost / NBC Safety / Impact) ── */}
+            <AnimatePresence>
+              {hudVisible && rightOpen && (
+                <motion.div
+                  initial={{ opacity: 0, x: 40, scale: 0.98 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: 40, scale: 0.98 }}
+                  transition={{ type: 'spring', damping: 26, stiffness: 300 }}
+                  className="hidden lg:flex absolute top-4 right-4 bottom-20 w-[440px] max-w-[calc(100vw-32px)] z-20 pointer-events-auto hud-panel flex-col overflow-hidden"
+                >
+                  {/* Right Panel Header */}
+                  <div className="hud-panel-header px-4 py-2.5 flex items-center justify-between flex-shrink-0">
+                    {appMode === 'plain' ? (
+                      <div className="flex items-center gap-2">
+                        <TrendingUp className="w-4 h-4 text-cyan-400" />
+                        <span className="font-heading font-semibold text-xs tracking-wide text-white uppercase">
+                          Feasibility & Budget
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
+                        <button
+                          type="button"
+                          onClick={() => setUrbanRightTab('impact')}
+                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
+                            urbanRightTab === 'impact'
+                              ? 'bg-orange-600 text-white font-semibold shadow'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <TrendingUp className="w-3.5 h-3.5" />
+                          <span>Impact & Safety</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setUrbanRightTab('phases')}
+                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
+                            urbanRightTab === 'phases'
+                              ? 'bg-orange-600 text-white font-semibold shadow'
+                              : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <span>Phases & NBC</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Collapse Button */}
+                    <button
+                      type="button"
+                      onClick={() => setRightOpen(false)}
+                      title="Collapse Right Panel"
+                      className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </button>
                   </div>
-                )}
-                {activeTab === 'levers' && <LeverPanel />}
-                {activeTab === 'impact' && (
+
+                  {/* Right Panel Content */}
+                  <div className="flex-1 overflow-y-auto hud-scroll">
+                    {appMode === 'plain' ? (
+                      <PlainLandMetrics />
+                    ) : urbanRightTab === 'impact' ? (
+                      <div className="p-1">
+                        <ImpactPanel />
+                      </div>
+                    ) : (
+                      <div className="p-1 space-y-2">
+                        <PhasePlan />
+                        <div className="border-t border-white/10 my-1" />
+                        <ScreeningChecks />
+                      </div>
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Right Panel Collapsed Floating Trigger */}
+            {hudVisible && !rightOpen && (
+              <button
+                type="button"
+                onClick={() => setRightOpen(true)}
+                title="Expand Feasibility KPIs"
+                className="hidden lg:flex absolute top-5 right-4 z-20 px-3 py-2 rounded-full hud-dock text-xs font-mono text-slate-200 hover:text-white items-center gap-2 shadow-2xl border border-white/20 hover:scale-105 transition-all"
+              >
+                <ChevronLeft className="w-3.5 h-3.5 text-slate-400" />
+                <span>{appMode === 'plain' ? 'Budget' : 'Impact KPIs'}</span>
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+              </button>
+            )}
+          </>
+        )}
+
+        {/* ── MOBILE / TABLET SLIDING DRAWER (< 1024px) ── */}
+        {appMode !== 'map' && (
+          <div className="lg:hidden absolute bottom-16 left-2 right-2 max-h-[46vh] z-20 hud-panel flex flex-col overflow-hidden shadow-2xl">
+            {/* Mobile Tab Switcher */}
+            <div className="hud-panel-header flex items-center border-b border-white/10">
+              <button
+                type="button"
+                onClick={() => setMobileTab('left')}
+                className={`flex-1 py-2 text-xs font-mono text-center transition-colors ${
+                  mobileTab === 'left'
+                    ? 'text-white font-bold bg-white/10 border-b-2 border-orange-500'
+                    : 'text-slate-400'
+                }`}
+              >
+                {appMode === 'plain' ? 'Structures & Sliders' : 'Site & Levers'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileTab('right')}
+                className={`flex-1 py-2 text-xs font-mono text-center transition-colors ${
+                  mobileTab === 'right'
+                    ? 'text-white font-bold bg-white/10 border-b-2 border-emerald-500'
+                    : 'text-slate-400'
+                }`}
+              >
+                {appMode === 'plain' ? 'Feasibility & Cost' : 'Impact & NBC'}
+              </button>
+            </div>
+
+            {/* Mobile Drawer Body */}
+            <div className="flex-1 overflow-y-auto p-2 hud-scroll">
+              {mobileTab === 'left' ? (
+                appMode === 'plain' ? <PlainLandStudio /> : (
+                  <div>
+                    <StateToggle />
+                    <div className="my-2 border-t border-white/10" />
+                    <BlueprintSelector compact={false} />
+                    <div className="my-2 border-t border-white/10" />
+                    <LeverPanel />
+                  </div>
+                )
+              ) : (
+                appMode === 'plain' ? <PlainLandMetrics /> : (
                   <div>
                     <ImpactPanel />
-                    <div className="border-t border-line" />
+                    <div className="my-2 border-t border-white/10" />
                     <PhasePlan />
-                    <div className="border-t border-line" />
+                    <div className="my-2 border-t border-white/10" />
                     <ScreeningChecks />
                   </div>
-                )}
-              </div>
+                )
+              )}
             </div>
           </div>
         )}
+
+        {/* ── FLOATING CENTERED COMMAND DOCK (Constructive-Style HUD Dock) ── */}
+        <BottomDock
+          hudVisible={hudVisible}
+          onToggleHud={() => setHudVisible(!hudVisible)}
+        />
       </main>
 
-      {/* Assumptions Drawer */}
+      {/* ── Assumptions Drawer ── */}
       <AssumptionsDrawer open={assumptionsOpen} />
 
-      {/* Toast Notification */}
+      {/* ── Toast Notifications ── */}
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -358,10 +423,10 @@ export default function App() {
 
 function SceneFallback() {
   return (
-    <div className="w-full h-full flex items-center justify-center bg-paper">
-      <div className="text-center">
-        <div className="skeleton-block w-32 mx-auto mb-3" />
-        <div className="label-mono">Rendering 3D Scene…</div>
+    <div className="w-full h-full flex items-center justify-center bg-slate-950 text-slate-300">
+      <div className="text-center font-mono text-xs">
+        <div className="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <div className="tracking-widest uppercase">Rendering 3D Digital Twin…</div>
       </div>
     </div>
   );

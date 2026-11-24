@@ -30,10 +30,10 @@ export default function Buildings({ baseline, levers, stage }) {
     };
   }, [geo, edgeGeo, mat, edgeMat]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!meshRef.current || !edgeRef.current) return;
-    const roadW = levers.roadWidthM;
-    const floors = Math.max(1, levers.maxFloors);
+    const roadW = levers?.roadWidthM || 7;
+    const floors = Math.max(1, levers?.maxFloors || 3);
     const dummy = new THREE.Object3D();
 
     for (let i = 0; i < 10; i++) {
@@ -42,14 +42,14 @@ export default function Buildings({ baseline, levers, stage }) {
 
       // Top side buildings
       dummy.position.set(x, floorH / 2, -(roadW / 2 + 2.5));
-      dummy.scale.set(2.5, floorH, 3);
+      dummy.scale.set(2.8, floorH, 3.2);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i, dummy.matrix);
       edgeRef.current.setMatrixAt(i, dummy.matrix);
 
       // Bottom side buildings
       dummy.position.set(x, floorH / 2, roadW / 2 + 2.5);
-      dummy.scale.set(2.5, floorH, 3);
+      dummy.scale.set(2.8, floorH, 3.2);
       dummy.updateMatrix();
       meshRef.current.setMatrixAt(i + 10, dummy.matrix);
       edgeRef.current.setMatrixAt(i + 10, dummy.matrix);
@@ -58,7 +58,7 @@ export default function Buildings({ baseline, levers, stage }) {
     meshRef.current.instanceMatrix.needsUpdate = true;
     edgeRef.current.instanceMatrix.needsUpdate = true;
     invalidate();
-  }, [levers.roadWidthM, levers.maxFloors, invalidate]);
+  }, [levers?.roadWidthM, levers?.maxFloors, invalidate]);
 
   return (
     <group>

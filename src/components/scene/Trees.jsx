@@ -19,10 +19,11 @@ export default function Trees({ levers }) {
     };
   }, [geo, mat, trunkGeo, trunkMat]);
 
-  useMemo(() => {
+  useEffect(() => {
     if (!meshRef.current) return;
-    const numTrees = Math.round((levers.greenPct / 100) * count);
-    const roadW = levers.roadWidthM;
+    const greenPct = levers?.greenPct || 15;
+    const roadW = levers?.roadWidthM || 7;
+    const numTrees = Math.round((greenPct / 100) * count);
     const dummy = new THREE.Object3D();
 
     for (let i = 0; i < count; i++) {
@@ -31,7 +32,6 @@ export default function Trees({ levers }) {
         const side = i < 10 ? -(roadW / 2 + 1.5) : (roadW / 2 + 1.5);
         dummy.position.set(x, 1, side);
         dummy.scale.set(1, 1, 1);
-        dummy.visible = true;
       } else {
         dummy.scale.set(0, 0, 0); // hide unused instances
       }
@@ -40,7 +40,7 @@ export default function Trees({ levers }) {
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
     invalidate();
-  }, [levers.greenPct, levers.roadWidthM, invalidate]);
+  }, [levers?.greenPct, levers?.roadWidthM, invalidate]);
 
   return (
     <instancedMesh ref={meshRef} args={[geo, mat, count]} position={[0, 0, 0]} />

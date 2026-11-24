@@ -145,37 +145,6 @@ export default function Scene3D() {
 
   return (
     <div className="relative w-full h-full">
-      {/* Floating 3D Camera Controls */}
-      <div className="absolute top-3 left-3 z-20 flex items-center bg-slate-900/85 backdrop-blur-md border border-slate-700/80 p-0.5 rounded shadow text-xs font-mono text-slate-300">
-        <button
-          type="button"
-          onClick={() => setCameraPreset('isometric')}
-          className={`px-2 py-1 rounded transition-colors ${
-            cameraPreset === 'isometric' ? 'bg-orange-600 text-white font-medium' : 'hover:text-white'
-          }`}
-        >
-          Isometric
-        </button>
-        <button
-          type="button"
-          onClick={() => setCameraPreset('street')}
-          className={`px-2 py-1 rounded transition-colors ${
-            cameraPreset === 'street' ? 'bg-orange-600 text-white font-medium' : 'hover:text-white'
-          }`}
-        >
-          Street
-        </button>
-        <button
-          type="button"
-          onClick={() => setCameraPreset('top')}
-          className={`px-2 py-1 rounded transition-colors ${
-            cameraPreset === 'top' ? 'bg-orange-600 text-white font-medium' : 'hover:text-white'
-          }`}
-        >
-          Top Blueprint
-        </button>
-      </div>
-
       <Canvas
         dpr={[1, 1.75]}
         frameloop="demand"

@@ -3,12 +3,13 @@
  * Live Calculation & Phased Milestone Output Panel for the Greenfield Plain-Land Studio.
  * Displays budget in Rs. Cr, timeline in months, families benefited, commuters served,
  * NBC safety rating, and 4-phase implementation schedule.
+ * Styled in Constructive-inspired obsidian glass HUD aesthetic.
  */
 
 import React from 'react';
 import {
   Coins, Calendar, Users, ShieldCheck, Leaf,
-  FileDown, CheckCircle2, ChevronRight, Sparkles
+  FileDown, ChevronRight, Sparkles, Building2
 } from 'lucide-react';
 import { useNeevStore } from '../../store/useNeevStore.js';
 import useT from '../../i18n/useT.js';
@@ -48,22 +49,23 @@ export default function PlainLandMetrics() {
   };
 
   return (
-    <div className="bg-white border-l border-line p-4 overflow-y-auto space-y-5 font-ui select-none h-full">
+    <div className="p-4 overflow-y-auto space-y-5 font-ui select-none h-full text-slate-100 hud-scroll">
       {/* Header */}
-      <div className="flex items-center justify-between pb-3 border-b border-line">
+      <div className="flex items-center justify-between pb-3 border-b border-white/10">
         <div>
-          <div className="text-2xs font-mono uppercase tracking-widest text-emerald-600 font-semibold">
-            {t('sheet_no')} • {t('sheet_scale')}
+          <div className="text-2xs font-mono uppercase tracking-widest text-emerald-400 font-semibold flex items-center gap-1">
+            <Sparkles className="w-3 h-3 text-emerald-400" />
+            FEASIBILITY HUD
           </div>
-          <h2 className="text-sm font-semibold font-heading text-ink mt-0.5 tracking-tight">
-            Greenfield Feasibility Summary
+          <h2 className="text-base font-semibold font-heading text-white mt-0.5 tracking-tight">
+            Greenfield Analysis
           </h2>
         </div>
 
         <button
           type="button"
           onClick={handleDownloadPdf}
-          className="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-medium flex items-center gap-1.5 shadow transition-colors"
+          className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-lg glow-emerald transition-all"
         >
           <FileDown className="w-3.5 h-3.5" />
           <span>DPR PDF</span>
@@ -73,59 +75,59 @@ export default function PlainLandMetrics() {
       {/* 4 Big Metrics Grid */}
       <div className="grid grid-cols-2 gap-2.5 font-mono">
         {/* Cost Card */}
-        <div className="p-3 rounded bg-paper border border-line">
-          <div className="text-[10px] text-muted uppercase tracking-wider flex items-center gap-1">
-            <Coins className="w-3 h-3 text-emerald-600" /> {t('plain_est_cost')}
+        <div className="hud-card p-3 border-emerald-500/30 bg-emerald-950/30 glow-emerald">
+          <div className="text-[10px] text-emerald-300 uppercase tracking-wider flex items-center gap-1 font-semibold">
+            <Coins className="w-3.5 h-3.5 text-emerald-400" /> {t('plain_est_cost')}
           </div>
-          <div className="text-lg font-bold font-heading text-emerald-700 mt-1">
+          <div className="text-lg font-bold font-heading text-white mt-1">
             {m.cost.formatted}
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">
-            Range: {m.cost.rangeFormatted}
+          <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+            {m.cost.rangeFormatted}
           </div>
         </div>
 
         {/* Timeline Card */}
-        <div className="p-3 rounded bg-paper border border-line">
-          <div className="text-[10px] text-muted uppercase tracking-wider flex items-center gap-1">
-            <Calendar className="w-3 h-3 text-cyan-600" /> {t('plain_est_timeline')}
+        <div className="hud-card p-3 border-cyan-500/30 bg-cyan-950/30 glow-cyan">
+          <div className="text-[10px] text-cyan-300 uppercase tracking-wider flex items-center gap-1 font-semibold">
+            <Calendar className="w-3.5 h-3.5 text-cyan-400" /> {t('plain_est_timeline')}
           </div>
-          <div className="text-lg font-bold font-heading text-ink mt-1">
+          <div className="text-lg font-bold font-heading text-white mt-1">
             {m.timeline.formatted}
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">
+          <div className="text-[10px] text-slate-400 mt-0.5">
             4-Phase Delivery
           </div>
         </div>
 
         {/* Social Impact: Families & Commuters */}
-        <div className="p-3 rounded bg-paper border border-line">
-          <div className="text-[10px] text-muted uppercase tracking-wider flex items-center gap-1">
-            <Users className="w-3 h-3 text-indigo-600" /> Beneficiaries
+        <div className="hud-card p-3 border-amber-500/30 bg-amber-950/30 glow-amber">
+          <div className="text-[10px] text-amber-300 uppercase tracking-wider flex items-center gap-1 font-semibold">
+            <Users className="w-3.5 h-3.5 text-amber-400" /> Beneficiaries
           </div>
-          <div className="text-sm font-bold font-heading text-ink mt-1">
+          <div className="text-sm font-bold font-heading text-white mt-1">
             {m.socialImpact.familiesHoused.toLocaleString()} Families
           </div>
-          <div className="text-[10px] text-slate-500 mt-0.5">
+          <div className="text-[10px] text-slate-400 mt-0.5 truncate">
             +{m.socialImpact.commutersServedDaily.toLocaleString()} daily commuters
           </div>
         </div>
 
         {/* Scores Card: NBC & Sustainability */}
-        <div className="p-3 rounded bg-paper border border-line flex flex-col justify-between">
+        <div className="hud-card p-3 border-white/10 bg-white/5 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-[10px] text-muted uppercase tracking-wider flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-emerald-600" /> NBC Safety
+            <span className="text-[10px] text-slate-300 uppercase tracking-wider flex items-center gap-1">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> NBC Safety
             </span>
-            <span className="font-bold text-xs text-emerald-700 bg-emerald-50 px-1 rounded">
+            <span className="font-bold text-xs text-emerald-300 bg-emerald-950/80 border border-emerald-500/40 px-1.5 py-0.2 rounded">
               {m.scores.nbcSafetyScore}/100
             </span>
           </div>
-          <div className="flex items-center justify-between mt-1 pt-1 border-t border-line">
-            <span className="text-[10px] text-muted uppercase tracking-wider flex items-center gap-1">
-              <Leaf className="w-3 h-3 text-teal-600" /> Eco Rating
+          <div className="flex items-center justify-between mt-1 pt-1 border-t border-white/10">
+            <span className="text-[10px] text-slate-300 uppercase tracking-wider flex items-center gap-1">
+              <Leaf className="w-3.5 h-3.5 text-teal-400" /> Eco Rating
             </span>
-            <span className="font-bold text-xs text-teal-700 bg-teal-50 px-1 rounded">
+            <span className="font-bold text-xs text-teal-300 bg-teal-950/80 border border-teal-500/40 px-1.5 py-0.2 rounded">
               {m.scores.sustainabilityScore}/100
             </span>
           </div>
@@ -134,19 +136,20 @@ export default function PlainLandMetrics() {
 
       {/* Selected Structures List */}
       <div className="space-y-2">
-        <div className="text-2xs font-mono uppercase tracking-widest text-muted font-semibold">
+        <div className="text-2xs font-mono uppercase tracking-widest text-slate-400 font-semibold flex items-center gap-1.5">
+          <Building2 className="w-3 h-3 text-cyan-400" />
           Active Structural Components ({m.selectedStructures.length})
         </div>
         <div className="space-y-1.5">
           {m.selectedStructures.map((s) => (
             <div
               key={s.id}
-              className="p-2 rounded bg-paper border border-line text-xs flex items-center justify-between"
+              className="p-2.5 rounded-lg hud-card text-xs flex items-center justify-between"
             >
-              <div className="font-medium text-slate-800">
+              <div className="font-medium text-slate-200">
                 {lang === 'hi' ? s.nameHi : s.name}
               </div>
-              <div className="font-mono text-[11px] text-emerald-700 font-semibold">
+              <div className="font-mono text-[11px] text-emerald-400 font-semibold">
                 Rs. {(s.baseCostCr + s.costPerAcreCr * m.areaAcres).toFixed(1)} Cr
               </div>
             </div>
@@ -155,27 +158,27 @@ export default function PlainLandMetrics() {
       </div>
 
       {/* Phased Construction Gantt & Deliverables */}
-      <div className="space-y-2 pt-2 border-t border-line">
-        <div className="text-2xs font-mono uppercase tracking-widest text-muted font-semibold flex items-center justify-between">
+      <div className="space-y-2 pt-2 border-t border-white/10">
+        <div className="text-2xs font-mono uppercase tracking-widest text-slate-400 font-semibold flex items-center justify-between">
           <span>Phased Implementation Plan</span>
-          <span>Budget Split</span>
+          <span className="text-emerald-400">Budget Split</span>
         </div>
 
         <div className="space-y-2">
           {m.phases.map((ph) => (
-            <div key={ph.phase} className="p-2.5 rounded bg-paper border border-line text-xs space-y-1">
+            <div key={ph.phase} className="p-3 rounded-xl hud-card text-xs space-y-1.5">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold text-white">
                   Phase {ph.phase}: {lang === 'hi' ? ph.titleHi : ph.title}
                 </span>
-                <span className="font-mono text-[11px] font-bold text-emerald-700">
+                <span className="font-mono text-[11px] font-bold text-emerald-400">
                   Rs. {ph.costCr} Cr ({ph.pctBudget}%)
                 </span>
               </div>
-              <div className="text-[10px] font-mono text-muted">
+              <div className="text-[10px] font-mono text-slate-400">
                 Duration: {ph.durationMonths} Months
               </div>
-              <ul className="text-[10px] text-slate-600 space-y-0.5 pt-0.5 list-disc list-inside">
+              <ul className="text-[10px] text-slate-300 space-y-0.5 pt-0.5 list-disc list-inside">
                 {ph.deliverables.map((d, idx) => (
                   <li key={idx} className="truncate">{d}</li>
                 ))}

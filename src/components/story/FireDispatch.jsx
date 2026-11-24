@@ -70,17 +70,16 @@ export default function FireDispatch() {
   };
 
   return (
-    <div className="bg-card border border-line" style={{ borderRadius: 2 }}>
+    <div className="relative">
       {!active ? (
         <button
           onClick={handleDispatch}
-          className="px-4 py-2 font-mono text-xs text-ink hover:bg-paper transition-colors"
-          style={{ minHeight: 36 }}
+          className="px-2.5 py-1 rounded-full text-[11px] font-mono text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 transition-all flex items-center gap-1.5"
         >
-          🚒 {t('fire_dispatch_btn')}
+          <span>🚒 {t('fire_dispatch_btn')}</span>
         </button>
       ) : (
-        <div className="p-3 w-72">
+        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 hud-panel p-3 w-80 text-white shadow-2xl border border-white/20">
           {/* Tender animation (top-down SVG) */}
           <div className="relative h-8 bg-paper border border-line mb-2" style={{ borderRadius: 1 }}>
             {/* Road strip */}

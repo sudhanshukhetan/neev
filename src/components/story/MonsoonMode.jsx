@@ -52,47 +52,43 @@ export default function MonsoonMode() {
 
   const reset = () => { setPlaying(false); setHour(0); };
 
-  if (!active) {
-    return (
-      <button
-        onClick={() => setActive(true)}
-        className="bg-card border border-line px-4 py-2 font-mono text-xs text-ink hover:bg-paper transition-colors"
-        style={{ borderRadius: 2, minHeight: 36 }}
-      >
-        🌧 {t('monsoon_btn')}
-      </button>
-    );
-  }
-
   const MAX_DEPTH_CM = assumptions.depthCapCm || 60;
   const GAUGE_H = 100; // px
 
   const renderGauge = (depth, label, color) => {
     const fillH = Math.min((depth / MAX_DEPTH_CM) * GAUGE_H, GAUGE_H);
-    const pct = Math.round((depth / MAX_DEPTH_CM) * 100);
     return (
       <div className="flex flex-col items-center gap-1">
-        <div className="font-mono text-xs text-muted">{label}</div>
-        <div className="relative border border-line" style={{ width: 28, height: GAUGE_H }}>
+        <div className="font-mono text-xs text-slate-300">{label}</div>
+        <div className="relative border border-white/20 bg-black/40 rounded" style={{ width: 32, height: GAUGE_H }}>
           {/* Sill at 30cm */}
           <div
-            className="absolute left-0 right-0 border-t border-dashed border-crimson opacity-60"
+            className="absolute left-0 right-0 border-t border-dashed border-red-500 opacity-80"
             style={{ bottom: (30 / MAX_DEPTH_CM) * GAUGE_H }}
           />
           {/* Water fill */}
           <div
-            className="absolute bottom-0 left-0 right-0 transition-all"
-            style={{ height: fillH, background: color, opacity: 0.6 }}
+            className="absolute bottom-0 left-0 right-0 transition-all rounded-b"
+            style={{ height: fillH, background: color, opacity: 0.8 }}
           />
         </div>
-        <div className="font-mono text-xs" style={{ color }}>{depth.toFixed(0)} cm</div>
-        {depth > 30 && <div className="font-mono text-xs text-crimson">⚠ Sill</div>}
+        <div className="font-mono text-xs font-semibold" style={{ color }}>{depth.toFixed(0)} cm</div>
+        {depth > 30 && <div className="font-mono text-[10px] text-red-400 font-bold">⚠ Sill Breach</div>}
       </div>
     );
   };
 
   return (
-    <div className="bg-card border border-line p-3" style={{ borderRadius: 2 }}>
+    <div className="relative">
+      {!active ? (
+        <button
+          onClick={() => setActive(true)}
+          className="px-2.5 py-1 rounded-full text-[11px] font-mono text-slate-200 bg-white/10 hover:bg-white/20 border border-white/15 transition-all flex items-center gap-1.5"
+        >
+          <span>🌧 {t('monsoon_btn')}</span>
+        </button>
+      ) : (
+        <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 z-50 hud-panel p-3 w-80 text-white shadow-2xl border border-white/20">
       <div className="flex items-center gap-3 mb-2">
         <span className="label-mono flex-1">🌧 {t('monsoon_btn')}</span>
         <button onClick={() => { setActive(false); reset(); }} className="font-mono text-xs text-muted">×</button>
@@ -148,6 +144,8 @@ export default function MonsoonMode() {
           ↺
         </button>
       </div>
+        </div>
+      )}
     </div>
   );
 }

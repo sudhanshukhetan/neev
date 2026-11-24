@@ -178,21 +178,25 @@ export default function SitePanel() {
 
       {/* Preset cards */}
       <div className="p-4">
-        <div className="label-mono mb-3">{t('site_presets_title')}</div>
+        <div className="label-mono mb-3 text-slate-300 font-semibold">{t('site_presets_title')}</div>
         <div className="flex flex-col gap-2">
           {PRESETS.map((preset) => (
             <button
               key={preset.id}
               onClick={() => handlePreset(preset)}
               disabled={isAuditing}
-              className="text-left border border-line p-3 hover:border-ink transition-colors disabled:opacity-50"
-              style={{ borderRadius: 2 }}
+              className="text-left border border-white/10 hud-card p-3 hover:border-orange-500/50 hover:bg-white/5 transition-all disabled:opacity-50 rounded-xl"
             >
-              <div className="font-heading text-xs font-600 text-ink mb-0.5">{preset.name}</div>
-              <div className="font-mono text-xs text-muted mb-1">{preset.ward}</div>
-              <div className="font-ui text-xs text-muted opacity-80 leading-snug">{preset.description}</div>
-              <div className="mt-2">
-                <span className="label-mono text-terracotta">{t('site_preset_select')} →</span>
+              <div className="font-heading text-xs font-semibold text-white mb-0.5">{preset.name}</div>
+              <div className="font-mono text-[11px] text-orange-400 mb-1">{preset.ward}</div>
+              <div className="font-ui text-xs text-slate-300 leading-snug">{preset.description}</div>
+              <div className="mt-2.5 flex items-center justify-between">
+                <span className="font-mono text-[11px] text-orange-400 font-semibold flex items-center gap-1">
+                  {t('site_preset_select')} →
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">
+                  {preset.baseline.laneWidthM}m width
+                </span>
               </div>
             </button>
           ))}
