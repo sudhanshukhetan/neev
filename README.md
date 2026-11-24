@@ -1,139 +1,128 @@
-# Neev (नींव)
-> **Urban Redevelopment & Pre-Feasibility Simulator for India**  
+# Neev (नींव) v2.0
+> **Urban Redevelopment & Greenfield Infrastructure Pre-Feasibility Simulator for India & the World**  
 > *Track 5: Smarter Cities & Civic Infrastructure*
 
 ```
 +---------------------------------------------------------------------------------+
-|                               NEEV ARCHITECTURE                                 |
+|                               NEEV v2.0 ARCHITECTURE                            |
 +---------------------------------------------------------------------------------+
 |                                                                                 |
-|  [ BROWSER CLIENT (React 18 + Vite + Tailwind + Three.js) ]                     |
-|  - Drafting-Sheet UI: Sheet NEEV-01, Scale 1:500, Rev 1.0                       |
-|  - Left Panel: Site Input (Upload/Camera/Presets) & Ruled Hazard Table          |
-|  - Center Stage (~70%): 3D Instanced WebGL Canvas / 2D SVG Blueprint Plan       |
-|  - Stage Stories: Fire-Tender Dispatch (Clearance Pinch) & Monsoon Mode         |
-|  - Controls: 9 Levers (Streets, Water, Buildings, Utilities) + Blueprint Presets|
-|  - Right Panel: Before/After Metrics, Ruled Gantt Phase Plan, Screening Checks  |
-|  - Transparency: Editable Assumptions Drawer & Formula Explanation Popovers    |
+|  [ UNIFIED SINGLE-REPOSITORY WEB APP (Vite + React 18 + Tailwind + Three.js) ]  |
+|  - Architectural Discovery Canvas: Interactive Leaflet Map with ESRI Satellite  |
+|  - Real-Time Environmental Engine: OpenStreetMap Nominatim + Open-Meteo Weather |
+|  - Plain-Land (Greenfield) Construction Studio: 6 Buildable Infrastructure Types|
+|  - Urban In-Situ Redevelopment Studio: 9 Levers + Chandigarh/Jaipur/Ahmedabad   |
+|  - Upgraded Three.js 3D Graphics: Directional Soft Shadows, Sky Dome & Presets  |
+|  - 4-Page Municipal DPR Export: jsPDF with Real-Time Coordinates, Weather & AQI |
 |                                     |                                           |
 |                 +-------------------+-------------------+                       |
 |                 |                                       |                       |
-|        [ Local Evaluation ]                    [ Network API ]                  |
-|        - Pure sync engine                      - Debounced authoritative call   |
-|        - 60fps immediate response              - Photo baseline extraction      |
-|                 |                                       |                       |
-|                 v                                       v                       |
-|  +--------------------------------+   +---------------------------------------+ |
-|  |   shared/engine.js             |   |   Node 20 Express Server (/api)       | |
-|  |   - computeMetrics()           |   |   - POST /api/audit (Photo/Preset)    | |
-|  |   - computeFire()              |   |   - POST /api/simulate (Authoritative)| |
-|  |   - computeFlood()             |   |   - GET  /api/health & /api/presets   | |
-|  |   - computeCost() (+/-40% band)|   |   - Multer 5MB + magic-byte check     | |
-|  |   - computePhases()            |   |   - Gemini Vision with 8s abort & det | |
-|  |   - runScreening()             |   +---------------------------------------+ |
+|        [ Local Sync Evaluation ]             [ Vercel Serverless Functions ]    |
+|        - Pure ES-Module Engine               - Zero CORS / Zero Extra Hosting   |
+|        - 60fps immediate response            - /api/health                      |
+|                 |                            - /api/location-intel              |
+|                 v                            - /api/simulate                    |
+|  +--------------------------------+          - /api/audit (Gemini Vision + Fall)|
+|  |   shared/engine.js             |          - /api/presets                     |
+|  |   shared/greenfieldEngine.js   |   +---------------------------------------+ |
+|  |   - computeMetrics()           |   |   Deployment: 1-Click Vercel Deploy   | |
+|  |   - computeGreenfieldProject() |   |   - vercel.json SPA + /api rewrites   | |
+|  |   - computeFire() / Flood()    |   |   - Node.js Serverless runtime        | |
+|  |   - runScreening() (NBC 2016)  |   +---------------------------------------+ |
 |  +--------------------------------+                                             |
 +---------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 1. Overview & Core Principles
+## 1. Overview & Core Features
 
-Neev ("नींव" - Foundation) is a pre-feasibility screening simulator designed for municipal commissioners, urban local bodies (ULBs), and citizens across India.
+Neev ("नींव" - Foundation) is a unified, production-grade civic pre-feasibility simulator empowering urban local bodies (ULBs), municipal commissioners, town planners, and citizens to model civic infrastructure and estimate budgets before civil execution.
 
-### Key Principles
-1. **Explainable by Design:** Every number on screen traces to a lever, a confirmed site baseline, or a named engineering assumption. No magic constants.
-2. **Blueprints as Lever Vectors:** Chandigarh, Jaipur, and Ahmedabad are preset vectors of the 9 levers. Selecting a blueprint sets the levers; the user can adjust any parameter.
-3. **Honest AI Role:** Gemini Vision estimates visual baseline features (`laneWidthM`, `obstructionM`, `drainCondition`, etc.) with per-field confidence chips. The procedural 2D/3D geometry is generated from the baseline and levers.
-4. **Pre-Feasibility Screening Disclaimer:**
-   > *"Pre-feasibility screening for discussion. Not a statutory approval, structural certification, or engineering design. Verify with NBC 2016, state bye-laws, and a licensed engineer."*
+### Key Capabilities
 
----
+1. **Interactive World Map & Real-Time Intelligence:**
+   - Explore any location in India or across the globe via Leaflet with an instant toggle between **ESRI Satellite** and **OpenStreetMap Street** imagery.
+   - Search any city, village, or coordinates using OpenStreetMap Nominatim.
+   - Click anywhere to fetch live **temperature, humidity, monsoon precipitation risk, wind speed**, and **Air Quality Index (AQI: PM2.5 / PM10)** via Open-Meteo.
+   - Automated land-use classification badge (`Dense Urban Area` vs. `Plain / Open Land`).
 
-## 2. The Nine Levers (`shared/levers.js`)
+2. **Plain-Land (Greenfield) Construction Studio:**
+   - 6 buildable critical infrastructure components:
+     1. **Express Highway**: 4/6-lane asphalt, concrete median barrier, LED streetlamps, and stormwater drainage.
+     2. **Overbridge / Flyover**: Elevated pre-stressed concrete deck, cylindrical support piers, approach ramps, and 5.5m clearance.
+     3. **Planned Residential Society**: Modern seismic-safe towers, central landscaped park, rooftop solar PV array, and recharge pits.
+     4. **Modern Independent House Cluster**: NBC-compliant courtyard (aangan) homes with permeable pavers and solar roof.
+     5. **Community Park & Recharge Zone**: Urban forest with native shade trees, perimeter walking track, and sunken percolation pond.
+     6. **Primary Health & Civic Hub**: Universal-accessible clinic, 24/7 ambulance bay portico, and solar battery backup.
+   - Combine multiple structures on virgin land, scale plot acreage (1–40 acres), mandatory green canopy %, and solar rooftop coverage %.
+   - Live calculations for capital budget (`Rs. Cr`), completion timeline (`Months`), families housed, daily commuters served, and NBC / Eco scores.
 
-| Lever | Range | Step | Unit | Group | Description |
-|---|---|---|---|---|---|
-| `roadWidthM` | 3 – 12 | 0.5 | m | Streets | Right-of-way width |
-| `footpathM` | 0 – 2.5 | 0.25 | m | Streets | Dedicated pedestrian path (each side) |
-| `obstructionClearPct` | 0 – 100 | 5 | % | Streets | Vendors/parked vehicles moved to marked zones |
-| `coveredDrainPct` | 0 – 100 | 5 | % | Water | Length of drain covered, desilted & maintained |
-| `rechargePits` | 0 – 10 | 1 | /100m | Water | Rainwater percolation pits |
-| `greenPct` | 5 – 40 | 1 | % | Water | Vegetative cover & tree canopies |
-| `maxFloors` | 2 – 6 | 1 | fl | Buildings | Floor count cap (seismic safety) |
-| `retrofitPct` | 0 – 100 | 10 | % | Buildings | Buildings seismically retrofitted (IS 1893 Zone IV) |
-| `undergroundUtilPct`| 0 – 100 | 10 | % | Utilities | Overhead electrical/telecom cables undergrounded |
+3. **Urban In-Situ Redevelopment Simulator:**
+   - 9 explainable civic levers for congested brownfield lanes: right-of-way carriageway, footpaths, green cover, max floors, covered drains, recharge pits, obstruction clearance, underground utilities, and seismic retrofitting.
+   - Three historical city blueprint vectors: **Chandigarh** (Broad Sector Grid), **Jaipur** (Walled Heritage City), and **Ahmedabad** (Dense Heritage Pol Enclave).
+   - Live Story Simulations: **Fire Tender Emergency Clearance** (pinch-point bottleneck detection) and **Monsoon Flood Simulation** (20–120 mm/hr storm simulation with doorway depth gauge).
 
----
+4. **Upgraded Three.js 3D Graphics:**
+   - Realistic directional sunlight with soft shadow maps (`castShadow` / `receiveShadow`).
+   - Atmospheric Sky dome scattering (`<Sky />`), hemisphere lighting, and subtle terrain materials.
+   - Smooth camera presets: `Isometric View`, `Street-Level View`, and `Top-Down Blueprint`.
+   - 2D SVG Blueprint drafting sheet fallback with React Error Boundary for low-bandwidth devices.
 
-## 3. Mathematical Models & Formulas (`shared/engine.js`)
+5. **Upgraded Municipal DPR PDF Export (`jspdf`):**
+   - 4-page formal municipal report with exact coordinates, geographic snapshot, live weather & AQI, Before/After performance metrics, NBC 2016 screening checks, CPWD DSR 2023 cost breakdown, and phased milestone Gantt schedule.
+   - Uses `Rs.` currency formatting throughout to ensure clean, artifact-free text rendering.
 
-### Fire Tender Access
-$$\text{Carriageway} = \text{roadWidthM} - 2 \times \text{footpathM}$$
-$$\text{Clear Width} = \text{Carriageway} - \text{obstructionM} \times (1 - \text{obstructionClearPct}/100)$$
-$$\text{Speed} = v_{\min} + (v_{\max} - v_{\min}) \times \text{smoothstep}(\text{Clear Width}, w_{\text{low}}, w_{\text{high}})$$
-$$\text{Response Time} = \frac{\text{Distance}}{\text{Speed}} \times 60 + \text{Dispatch Time} + (\text{Blocked Delay if clear} < 3.5\text{m})$$
-
-### Stormwater & Flood Modelling
-$$\text{Runoff } C = \text{clamp}(c_{\text{base}} - c_{\text{green}} \times \text{greenPct} - c_{\text{recharge}} \times \text{rechargePits}, c_{\min}, 0.95)$$
-$$\text{Inflow} = \text{Rainfall} \times \text{Catchment Area} \times C$$
-$$\text{Drain Capacity} = \text{Base Capacity} \times \text{blend}(\text{Drain Condition}, \text{Covered Factor}, \text{coveredDrainPct}/100)$$
-$$\text{Ponding Depth (cm)} = \frac{k_{\text{pond}} \times \max(0, \text{Inflow} - \text{Capacity}) \times \text{Duration}}{\text{Pond Area Factor}}$$
-
-### Cost Estimation (±40% Band)
-Cost is computed as a deterministic midpoint sum across road widening, drain desilting, seismic retrofitting, green infrastructure, recharge pits, and utility undergrounding. All outputs display the midpoint alongside the range:
-$$\text{Low} = 0.6 \times \text{Midpoint}, \quad \text{High} = 1.4 \times \text{Midpoint}$$
+6. **Unified 1-Click Vercel Architecture:**
+   - Single root Vite + React monorepo containing frontend and serverless functions in `/api`.
+   - Zero CORS issues, zero separate backend servers, and zero port conflicts.
 
 ---
 
-## 4. Setup & Running Instructions
+## 2. Quickstart & Local Development
 
 ### Prerequisites
-- Node.js >= 20.x
-- npm >= 10.x
+- Node.js 18+ or 20+
+- npm 9+
 
-### Environment Variables (`server/.env`)
+### Setup & Run
 ```bash
-PORT=5000
-GEMINI_API_KEY=your_gemini_api_key_here
-GEMINI_PRIMARY_MODEL=gemini-2.5-flash
-GEMINI_FALLBACK_MODEL=gemini-2.0-flash
-```
+# Clone the repository
+git clone https://github.com/sudhanshukhetan/neev.git
+cd neev
 
-### Installation
-```bash
+# Install all dependencies
 npm install
-```
 
-### Running Locally
-```bash
-# Start both client (Vite on :5173) and server (Express on :5000) concurrently:
+# Start unified local development server (serves frontend & /api serverless endpoints)
 npm run dev
+
+# Open http://localhost:5173
 ```
 
-### Testing & Verification
+### Production Build & Tests
 ```bash
-# Run unit test suite (vitest):
+# Run 29 unit tests (monotonicity, thresholds, determinism, greenfield calculations)
 npm test
 
-# Build client for production:
+# Build production bundle for Vercel
 npm run build
-
-# Run linting check:
-npm run lint
 ```
 
 ---
 
-## 5. Key Story Moments & Interactive Modes
+## 3. Vercel Deployment
 
-1. **Fire Tender Dispatch (`FireDispatch.jsx` / `FireTender3D.jsx`):**
-   - Click "Dispatch Fire Tender".
-   - Current State: Vehicle stops at the pinch point where clear width < 3.5m, showing `BLOCKED`, the crimson pinch dimension, and stalled timer.
-   - Planned State: Vehicle navigates the widened carriageway, showing exact elapsed response time in minutes.
-2. **Monsoon Mode (`MonsoonMode.jsx` / `FloodPlane3D.jsx`):**
-   - Live rainfall intensity slider (20 to 120 mm/hr).
-   - Animated 3-hour storm timeline.
-   - Dual depth gauges comparing Current vs Planned ponding with a 30cm door-sill threshold indicator.
-3. **Municipal DPR Export (`lib/pdf.js`):**
-   - Generates an A4 PDF complete with site baseline, lever values, Before/After impact metrics, screening checklist, cost breakdown, and the full "Method & Assumptions" appendix.
+1. Push to your GitHub repository.
+2. Import the repository in [Vercel](https://vercel.com).
+3. Framework Preset: **Vite** (auto-detected via `vercel.json`).
+4. Optional Environment Variables:
+   - `GEMINI_API_KEY`: Google Gemini API key for photo baseline pre-filling (falls back gracefully to deterministic verified engine if omitted).
+5. Deploy! Vercel serves the static SPA frontend and deploys `/api/*.js` as serverless functions with zero additional configuration.
+
+---
+
+## 4. Statutory Disclaimer
+
+> **PRE-FEASIBILITY SCREENING DOCUMENT**  
+> *This application is a pre-feasibility screening tool for preliminary discussion and civic planning. It is NOT a statutory approval, planning clearance, structural certification, or engineering design. All cost estimates carry an uncertainty band based on CPWD DSR 2023 schedule of rates. Always verify findings against NBC 2016, state municipal bye-laws, and with a licensed civil engineer/town planner before committing capital or regulatory submissions.*
