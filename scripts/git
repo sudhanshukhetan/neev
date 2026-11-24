@@ -1,0 +1,2 @@
+#!/bin/bash
+exec /usr/bin/git --git-dir=/tmp/neev_git --work-tree=/Users/sudhanshu/neev "$@"
