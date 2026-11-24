@@ -490,3 +490,6 @@ export function explain({ baseline, levers, assumptions: A }) {
     cost: explainCost({ baseline, levers, assumptions: A }),
   };
 }
+
+export { computeGreenfieldProject, INFRASTRUCTURE_TYPES, INFRASTRUCTURE_MAP } from './greenfieldEngine.js';
+

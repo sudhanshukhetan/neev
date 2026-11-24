@@ -15,6 +15,7 @@ import {
   computePhases,
   runScreening,
   explain,
+  computeGreenfieldProject,
 } from './engine.js';
 import { DEFAULT_ASSUMPTIONS, mergeAssumptions } from './assumptions.js';
 import { clampLevers, DEFAULT_LEVERS } from './levers.js';
@@ -300,3 +301,30 @@ describe('explain()', () => {
     expect(exp.fire).toContain('9');
   });
 });
+
+// ─── Greenfield (Plain Land) Construction Engine ─────────────────────────────
+
+describe('computeGreenfieldProject()', () => {
+  test('computes deterministic cost, timeline, and scores for default selections', () => {
+    const res = computeGreenfieldProject({ selectedIds: ['society', 'park'], areaAcres: 5 });
+    expect(res.cost.estimateCr).toBeGreaterThan(30);
+    expect(res.timeline.months).toBeGreaterThan(12);
+    expect(res.scores.nbcSafetyScore).toBeGreaterThanOrEqual(85);
+    expect(res.scores.sustainabilityScore).toBeGreaterThanOrEqual(80);
+    expect(res.phases.length).toBe(4);
+  });
+
+  test('cost scales monotonically with area (acres)', () => {
+    const small = computeGreenfieldProject({ selectedIds: ['highway'], areaAcres: 2 });
+    const large = computeGreenfieldProject({ selectedIds: ['highway'], areaAcres: 10 });
+    expect(large.cost.estimateCr).toBeGreaterThan(small.cost.estimateCr);
+    expect(large.socialImpact.commutersServedDaily).toBeGreaterThan(small.socialImpact.commutersServedDaily);
+  });
+
+  test('sustainability score increases with higher green & solar percentages', () => {
+    const lowEco = computeGreenfieldProject({ selectedIds: ['society'], greenPct: 10, solarPct: 20 });
+    const highEco = computeGreenfieldProject({ selectedIds: ['society'], greenPct: 40, solarPct: 80 });
+    expect(highEco.scores.sustainabilityScore).toBeGreaterThan(lowEco.scores.sustainabilityScore);
+  });
+});
+
