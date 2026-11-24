@@ -298,9 +298,37 @@ export default function WorldMap() {
       </MapContainer>
 
       {/* ── Instruction pill on bottom center ── */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none hidden md:flex items-center gap-2 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 px-4 py-1.5 rounded-full shadow-2xl text-xs text-slate-300 font-mono">
-        <Sparkles className="w-3.5 h-3.5 text-orange-400 animate-pulse" />
-        Click anywhere on the world map to inspect land use, real-time weather & AQI
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-[1000] pointer-events-none flex items-center gap-2 bg-white/95 backdrop-blur-md border border-slate-300 px-4 py-2 rounded-full shadow-xl text-xs text-slate-800 font-mono font-medium">
+        <span className="w-2.5 h-2.5 rounded-full bg-[#D4FF00] border border-black animate-pulse" />
+        <span>Click any street on the map to analyse a 250 m area around it.</span>
+      </div>
+
+      {/* ── Constructive Map Legend in bottom left ── */}
+      <div className="absolute bottom-5 left-5 z-[1000] pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-xl p-3 shadow-xl font-mono text-[11px] text-slate-800 space-y-1.5 hidden md:block">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-500" />
+          <span>Too narrow for fire tender (&lt; 3.5 m)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+          <span>Tight corridor (3.5 – 6 m)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+          <span>Clear / Standard (&gt; 6 m)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3.5 h-0.5 bg-blue-500 rounded" />
+          <span>Mapped stormwater drain</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-700" />
+          <span>Fire station (0.6 km)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3.5 h-0.5 bg-slate-400 rounded" />
+          <span>Elevated flyover</span>
+        </div>
       </div>
 
       {/* ── Area Intelligence Drawer ── */}

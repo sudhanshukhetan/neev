@@ -63,6 +63,18 @@ const DEFAULT_PLAIN_LAND = {
   solarPct: 50,
 };
 
+export const CITIES = [
+  { name: 'Chandni Chowk', city: 'Old Delhi', lat: 28.6562, lon: 77.2300, desc: 'Narrow commercial heritage lane with 2.9m clear width' },
+  { name: 'Connaught Place', city: 'New Delhi', lat: 28.6315, lon: 77.2167, desc: 'Historic radial commercial business district' },
+  { name: 'Karol Bagh', city: 'Central Delhi', lat: 28.6514, lon: 77.1907, desc: 'High-density mixed market corridor' },
+  { name: 'Faridabad', city: 'Haryana', lat: 28.4089, lon: 77.3178, desc: 'Informal urban-fringe colony in Seismic Zone IV' },
+  { name: 'Dharavi', city: 'Mumbai', lat: 19.0434, lon: 72.8567, desc: 'Ultra-dense in-situ artisan cluster with narrow passages' },
+  { name: 'Bengaluru Market', city: 'Bengaluru', lat: 12.9698, lon: 77.5753, desc: 'Chikpete wholesale market corridor' },
+  { name: 'Chandigarh Sector', city: 'Chandigarh', lat: 30.7415, lon: 76.7681, desc: 'Le Corbusier planned grid sector' },
+  { name: 'Jaipur Heritage', city: 'Jaipur', lat: 26.9239, lon: 75.8267, desc: 'Walled pink city bazaar with high vendor density' },
+  { name: 'Ahmedabad Smart-Transit', city: 'Ahmedabad', lat: 23.0225, lon: 72.5714, desc: 'Dedicated BRTS corridor with recharge pits' },
+];
+
 export const useNeevStore = create((set, get) => {
   const assumptionOverrides = loadAssumptions();
   const assumptions = mergeAssumptions(assumptionOverrides);
@@ -80,6 +92,32 @@ export const useNeevStore = create((set, get) => {
     // ── Primary App Navigation Mode: 'map' | 'urban' | 'plain' ──
     appMode: 'map',
     setAppMode: (appMode) => set({ appMode }),
+
+    // ── Constructive Civic City & Persona Controls ──
+    viewingAs: 'ward_officer', // 'ward_officer' | 'planner' | 'resident'
+    setViewingAs: (viewingAs) => set({ viewingAs }),
+    selectedCity: 'Chandni Chowk',
+    setSelectedCity: (cityName) => {
+      const c = CITIES.find((item) => item.name === cityName);
+      if (c) {
+        set({
+          selectedCity: c.name,
+          selectedCoordinates: { lat: c.lat, lon: c.lon },
+        });
+      } else {
+        set({ selectedCity: cityName });
+      }
+    },
+
+    // ── Scenario Stress Test ('normal' | 'monsoon' | 'fire') ──
+    scenario: 'normal',
+    setScenario: (scenario) => {
+      set({
+        scenario,
+        monsoonActive: scenario === 'monsoon',
+        fireDispatchActive: scenario === 'fire',
+      });
+    },
 
     // ── 3D Viewport Camera Preset: 'isometric' | 'street' | 'top' ──
     cameraPreset: 'isometric',

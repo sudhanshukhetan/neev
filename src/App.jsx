@@ -21,6 +21,7 @@ import Navbar from './components/layout/Navbar.jsx';
 import Hero from './components/layout/Hero.jsx';
 import WorldMap from './components/map/WorldMap.jsx';
 import BottomDock from './components/studio/BottomDock.jsx';
+import ConstructiveStudyHUD from './components/studio/ConstructiveStudyHUD.jsx';
 
 // Urban Studio Components
 import SitePanel from './components/studio/SitePanel.jsx';
@@ -136,10 +137,15 @@ export default function App() {
           )}
         </div>
 
-        {/* ── DESKTOP FLOATING HUD PANELS (Shown for Urban & Plain modes) ── */}
-        {appMode !== 'map' && (
+        {/* ── CONSTRUCTIVE CIVIC 3D STREET STUDY HUD (When Urban Mode Active) ── */}
+        {appMode === 'urban' && hudVisible && (
+          <ConstructiveStudyHUD />
+        )}
+
+        {/* ── DESKTOP FLOATING HUD PANELS (When Plain Land Mode Active) ── */}
+        {appMode === 'plain' && (
           <>
-            {/* ── 1. LEFT HUD PANEL (Parameters / Structures / Levers) ── */}
+            {/* ── 1. LEFT HUD PANEL (Greenfield Structures & Sliders) ── */}
             <AnimatePresence>
               {hudVisible && leftOpen && (
                 <motion.div
@@ -149,45 +155,13 @@ export default function App() {
                   transition={{ type: 'spring', damping: 26, stiffness: 300 }}
                   className="hidden lg:flex absolute top-4 left-4 bottom-20 w-[420px] max-w-[calc(100vw-32px)] z-20 pointer-events-auto hud-panel flex-col overflow-hidden"
                 >
-                  {/* Left Panel Header */}
                   <div className="hud-panel-header px-4 py-2.5 flex items-center justify-between flex-shrink-0">
-                    {appMode === 'plain' ? (
-                      <div className="flex items-center gap-2">
-                        <Sparkles className="w-4 h-4 text-emerald-400" />
-                        <span className="font-heading font-semibold text-xs tracking-wide text-white uppercase">
-                          Greenfield Structures
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
-                        <button
-                          type="button"
-                          onClick={() => setUrbanLeftTab('levers')}
-                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
-                            urbanLeftTab === 'levers'
-                              ? 'bg-orange-600 text-white font-semibold shadow'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <Sliders className="w-3.5 h-3.5" />
-                          <span>9 Levers</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setUrbanLeftTab('site')}
-                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
-                            urbanLeftTab === 'site'
-                              ? 'bg-orange-600 text-white font-semibold shadow'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <MapPin className="w-3.5 h-3.5" />
-                          <span>Site & Photo</span>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Collapse Button */}
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <span className="font-heading font-semibold text-xs tracking-wide text-white uppercase">
+                        Greenfield Structures
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setLeftOpen(false)}
@@ -197,25 +171,8 @@ export default function App() {
                       <ChevronLeft className="w-4 h-4" />
                     </button>
                   </div>
-
-                  {/* Left Panel Content */}
                   <div className="flex-1 overflow-y-auto hud-scroll">
-                    {appMode === 'plain' ? (
-                      <PlainLandStudio />
-                    ) : urbanLeftTab === 'levers' ? (
-                      <div>
-                        <div className="p-2 border-b border-white/10">
-                          <BlueprintSelector compact={false} />
-                        </div>
-                        <LeverPanel />
-                      </div>
-                    ) : (
-                      <div className="p-1">
-                        <SitePanel />
-                        <div className="border-t border-white/10 my-1" />
-                        <AuditPanel />
-                      </div>
-                    )}
+                    <PlainLandStudio />
                   </div>
                 </motion.div>
               )}
@@ -226,16 +183,16 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setLeftOpen(true)}
-                title="Expand Parameters"
+                title="Expand Structures"
                 className="hidden lg:flex absolute top-5 left-4 z-20 px-3 py-2 rounded-full hud-dock text-xs font-mono text-slate-200 hover:text-white items-center gap-2 shadow-2xl border border-white/20 hover:scale-105 transition-all"
               >
-                <Sliders className="w-3.5 h-3.5 text-orange-400" />
-                <span>{appMode === 'plain' ? 'Structures' : 'Parameters'}</span>
+                <Sliders className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Structures</span>
                 <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
               </button>
             )}
 
-            {/* ── 2. RIGHT HUD PANEL (Feasibility KPIs / Cost / NBC Safety / Impact) ── */}
+            {/* ── 2. RIGHT HUD PANEL (Feasibility KPIs & Budget) ── */}
             <AnimatePresence>
               {hudVisible && rightOpen && (
                 <motion.div
@@ -245,45 +202,13 @@ export default function App() {
                   transition={{ type: 'spring', damping: 26, stiffness: 300 }}
                   className="hidden lg:flex absolute top-4 right-4 bottom-20 w-[440px] max-w-[calc(100vw-32px)] z-20 pointer-events-auto hud-panel flex-col overflow-hidden"
                 >
-                  {/* Right Panel Header */}
                   <div className="hud-panel-header px-4 py-2.5 flex items-center justify-between flex-shrink-0">
-                    {appMode === 'plain' ? (
-                      <div className="flex items-center gap-2">
-                        <TrendingUp className="w-4 h-4 text-cyan-400" />
-                        <span className="font-heading font-semibold text-xs tracking-wide text-white uppercase">
-                          Feasibility & Budget
-                        </span>
-                      </div>
-                    ) : (
-                      <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg border border-white/10">
-                        <button
-                          type="button"
-                          onClick={() => setUrbanRightTab('impact')}
-                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
-                            urbanRightTab === 'impact'
-                              ? 'bg-orange-600 text-white font-semibold shadow'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <TrendingUp className="w-3.5 h-3.5" />
-                          <span>Impact & Safety</span>
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setUrbanRightTab('phases')}
-                          className={`px-3 py-1 rounded-md text-xs font-mono transition-all flex items-center gap-1.5 ${
-                            urbanRightTab === 'phases'
-                              ? 'bg-orange-600 text-white font-semibold shadow'
-                              : 'text-slate-400 hover:text-white'
-                          }`}
-                        >
-                          <ShieldCheck className="w-3.5 h-3.5" />
-                          <span>Phases & NBC</span>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Collapse Button */}
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-cyan-400" />
+                      <span className="font-heading font-semibold text-xs tracking-wide text-white uppercase">
+                        Feasibility & Budget
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => setRightOpen(false)}
@@ -293,22 +218,8 @@ export default function App() {
                       <ChevronRight className="w-4 h-4" />
                     </button>
                   </div>
-
-                  {/* Right Panel Content */}
                   <div className="flex-1 overflow-y-auto hud-scroll">
-                    {appMode === 'plain' ? (
-                      <PlainLandMetrics />
-                    ) : urbanRightTab === 'impact' ? (
-                      <div className="p-1">
-                        <ImpactPanel />
-                      </div>
-                    ) : (
-                      <div className="p-1 space-y-2">
-                        <PhasePlan />
-                        <div className="border-t border-white/10 my-1" />
-                        <ScreeningChecks />
-                      </div>
-                    )}
+                    <PlainLandMetrics />
                   </div>
                 </motion.div>
               )}
@@ -323,7 +234,7 @@ export default function App() {
                 className="hidden lg:flex absolute top-5 right-4 z-20 px-3 py-2 rounded-full hud-dock text-xs font-mono text-slate-200 hover:text-white items-center gap-2 shadow-2xl border border-white/20 hover:scale-105 transition-all"
               >
                 <ChevronLeft className="w-3.5 h-3.5 text-slate-400" />
-                <span>{appMode === 'plain' ? 'Budget' : 'Impact KPIs'}</span>
+                <span>Budget & Feasibility</span>
                 <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
               </button>
             )}
@@ -386,11 +297,13 @@ export default function App() {
           </div>
         )}
 
-        {/* ── FLOATING CENTERED COMMAND DOCK (Constructive-Style HUD Dock) ── */}
-        <BottomDock
-          hudVisible={hudVisible}
-          onToggleHud={() => setHudVisible(!hudVisible)}
-        />
+        {/* ── FLOATING CENTERED COMMAND DOCK (Shown for Plain Land & Map modes) ── */}
+        {appMode !== 'urban' && (
+          <BottomDock
+            hudVisible={hudVisible}
+            onToggleHud={() => setHudVisible(!hudVisible)}
+          />
+        )}
       </main>
 
       {/* ── Assumptions Drawer ── */}

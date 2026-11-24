@@ -155,10 +155,10 @@ export default function Scene3D() {
           alpha: false,
           powerPreference: 'high-performance',
         }}
-        style={{ background: '#F8FAFC' }}
+        style={{ background: '#EFECE6' }}
       >
-        <color attach="background" args={['#F8FAFC']} />
-        <fog attach="fog" args={['#F8FAFC', 50, 110]} />
+        <color attach="background" args={['#EFECE6']} />
+        <fog attach="fog" args={['#EFECE6', 45, 115]} />
         <Lighting />
 
         {isUrban ? (

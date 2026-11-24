@@ -2,9 +2,9 @@ import React, { useRef, useMemo, useEffect } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const BUILDING_COLOR_CURRENT = '#D1D5DB';
-const BUILDING_COLOR_PLANNED = '#F1F5F9';
-const EDGE_COLOR = '#94A3B8';
+const BUILDING_COLOR_CURRENT = '#D4CEBF';
+const BUILDING_COLOR_PLANNED = '#F5F0E6';
+const EDGE_COLOR = '#8A8275';
 
 export default function Buildings({ baseline, levers, stage }) {
   const meshRef = useRef();
